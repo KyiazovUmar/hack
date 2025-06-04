@@ -4,10 +4,10 @@ from user_data import user_chat_ids
 
 app = Flask(__name__)
 BOT_TOKEN = '7461480911:AAF7CcvwU03m5npGWYWXRZ1P7fHJOv1VGJk'  # Replace this
-
 @app.route('/')
 def index():
-    return render_template('index.html')
+    username = request.args.get("by", "Anonymous")
+    return render_template('index.html', by=username)
 
 @app.route('/api/send-photo', methods=['POST'])
 def receive_photo():
